@@ -3,7 +3,7 @@
 **project GhostLS aims to replicate the Infamous command `ls`, and some of its flags**
 
 Here is the file structure
-
+```
 .
 ├── coloredoutput.go
 ├── DirectorySearchers.go
@@ -17,7 +17,7 @@ Here is the file structure
 ├── parseoptions.go
 ├── README.md
 └── utils.go
-
+```
 ***To Run this project***
 
 1. `make ghostLS` after cloning and navigating
