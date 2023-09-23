@@ -1,4 +1,4 @@
-# Ghostls (my-ls-1)
+# GhostLs (My-Ls-1)
 
 **project GhostLS aims to replicate the Infamous command `ls`, and some of its flags**
 
