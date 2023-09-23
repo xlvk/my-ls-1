@@ -5,4 +5,5 @@ var(
 	RecursiveSearch = false
 	LongFormat = false
 	ReverseOrder = false
+	Timesort = false
 )

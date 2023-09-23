@@ -16,6 +16,8 @@ func ParseFlags(args []string) []string {
 				LongFormat = true
 			case "-r":
 				ReverseOrder = true
+			case "-t":
+				Timesort = true
 			default:
 				continue
 			}

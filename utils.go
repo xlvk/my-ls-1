@@ -8,17 +8,52 @@ import (
 	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
-func IsBinaryExecutable(filename string) bool {
-	fileInfo, err := os.Stat(filename)
-	if err != nil {
-		log.Fatal(err)
+type File struct {
+	Path string
+	Time time.Time
+}
+
+func SortByCreationTime(initialdir string, filePaths []string, reverse bool) []string {
+	files := make([]File, len(filePaths))
+
+	for i, path := range filePaths {
+		fileInfo, err := os.Stat(initialdir + "/" + path)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		files[i] = File{
+			Path: path,
+			Time: fileInfo.ModTime(),
+		}
 	}
 
-	// Check if the file mode has the executable permission
-	// bitwise usage inspired by session with sayhusain and labdulla
-	return fileInfo.Mode().Perm()&0111 == 0
+	for i := 0; i < len(files)-1; i++ {
+		maxIndex := i
+
+		for j := i + 1; j < len(files); j++ {
+			if ReverseOrder {
+				if files[j].Time.Before(files[maxIndex].Time) {
+					maxIndex = j
+				}
+			} else {
+				if files[j].Time.After(files[maxIndex].Time) {
+					maxIndex = j
+				}
+			}
+		}
+
+		files[i], files[maxIndex] = files[maxIndex], files[i]
+	}
+
+	sortedPaths := make([]string, len(files))
+	for i, file := range files {
+		sortedPaths[i] = file.Path
+	}
+	return sortedPaths
 }
 
 func BubbleSort(arr []string) {

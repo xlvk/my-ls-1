@@ -29,13 +29,23 @@ func RecursiveSearchDir(filepath string) {
 		fileArray = append(fileArray, file.Name())
 	}
 
-	//* bubble sort the arrays and proceed
-	if ReverseOrder {
-		RevBubbleSort(fileArray)
-		RevBubbleSort(Directories)
+	//* sort the arrays and proceed
+	if !Timesort {
+		if ReverseOrder {
+			RevBubbleSort(fileArray)
+			RevBubbleSort(Directories)
+		} else {
+			BubbleSort(fileArray)
+			BubbleSort(Directories)
+		}
 	} else {
-		BubbleSort(fileArray)
-		BubbleSort(Directories)
+		if ReverseOrder {
+			fileArray = SortByCreationTime(filepath, fileArray, true)
+			Directories = SortByCreationTime(filepath, Directories, true)
+		} else {
+			fileArray = SortByCreationTime(filepath, fileArray, false)
+			Directories = SortByCreationTime(filepath, Directories, false)
+		}
 	}
 
 	for _, v := range fileArray {
@@ -87,8 +97,20 @@ func NormalSearchDir(filepath string) {
 		fileArray = append(fileArray, file.Name())
 	}
 
-	//* bubble sort the arrays and proceed
-	BubbleSort(fileArray)
+	//* sort the arrays and proceed
+	if !Timesort {
+		if ReverseOrder {
+			RevBubbleSort(fileArray)
+		} else {
+			BubbleSort(fileArray)
+		}
+	} else {
+		if ReverseOrder {
+			fileArray = SortByCreationTime(filepath, fileArray, true)
+		} else {
+			fileArray = SortByCreationTime(filepath, fileArray, false)
+		}
+	}
 
 	for _, v := range fileArray {
 		todisplay := ""
