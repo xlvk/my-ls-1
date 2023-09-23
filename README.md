@@ -21,7 +21,7 @@ Here is the file structure
 ***To Run this project***
 
 1. `make ghostLS` after cloning and navigating
-2. `./ghostLS [OPTIONS] [FLAGS]`
+2. `./GhostLS [OPTIONS] [FLAGS]`
 
 Project was Written in **Golang** using only allowed libraies
 
