@@ -40,9 +40,10 @@ func OrangePrintln(args ...any) {
 	fmt.Println(resetANSI)
 }
 
-func BluePrintln(args ...any) {
-	fmt.Print(blueANSI)
-	fmt.Print(boldANSI)
-	fmt.Print(args...)
-	fmt.Println(resetANSI)
+func BlueFormat(args ...any) string {
+	// fmt.Print(blueANSI)
+	// fmt.Print(boldANSI)
+	// fmt.Print(args...)
+	// fmt.Println(resetANSI)
+	return blueANSI+boldANSI+fmt.Sprintf("%s", args[0])+resetANSI
 }

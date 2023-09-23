@@ -12,6 +12,8 @@ func ParseFlags(args []string) []string {
 				DisplayHidden = true
 			case "-R":
 				RecursiveSearch = true
+			case "-l":
+				LongFormat = true
 			default:
 				continue
 			}

@@ -7,61 +7,110 @@ import (
 	"strings"
 )
 
+// TODO: FIX BUG
+
 func RecursiveSearchDir(filepath string) {
-	files, err := os.ReadDir(filepath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	OrangePrintln(filepath + ":")
-	for _, file := range files {
-		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
-			continue
-		}
-		fileinfo, err := os.Stat(filepath + "/" + file.Name())
-		if err != nil {
-			if os.IsNotExist(err) {
-				continue
-			}
-			log.Fatal(err)
-		}
-		if fileinfo.IsDir() {
-			BluePrintln(file.Name())
-			RecursiveSearchDir(filepath + "/" + file.Name())
-			continue
-		}
-		fmt.Print(file.Name() + " ")
-
-	}
-	fmt.Println()
-}
-
-func NormalSearchDir(filepath string) {
-	files, err := os.ReadDir(filepath)
+	var Directories []string
 	var fileArray []string
+	files, err := os.ReadDir(filepath)
 	if err != nil {
 		log.Fatal(err)
 	}
-	OrangePrintln(filepath + ":")
 	for _, file := range files {
-		fileinfo, err := os.Stat(filepath + "/" + file.Name())
-		if err != nil {
-			if os.IsNotExist(err) {
-				continue
-			}
-			log.Fatal(err)
-		}
 		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
 			continue
 		}
+		fileinfo, err := os.Stat(filepath + "/" + file.Name())
+		if err != nil {
+			fmt.Println("STAT ERROR")
+			log.Fatal(err)
+		}
 		if fileinfo.IsDir() {
-			BluePrintln(file.Name())
-			continue
+			Directories = append(Directories, file.Name())
 		}
 		fileArray = append(fileArray, file.Name())
 	}
+
+	//* bubble sort the arrays and proceed
 	BubbleSort(fileArray)
+	BubbleSort(Directories)
+
 	for _, v := range fileArray {
-		fmt.Print(v + " ")
+		todisplay := ""
+		filestat, err := os.Stat(filepath + "/" + v)
+		if err != nil {
+			fmt.Println("FILEARRAY ERR")
+			log.Fatal(err)
+		}
+		permissions, err := GetFilePermissions(filepath + "/" + v)
+		if permissions == "" {
+			log.Fatal(err)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		if !LongFormat {
+			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
+				todisplay = BlueFormat(v)
+				fmt.Print(todisplay + " ")
+			} else {
+				fmt.Print(filestat.Name() + " ")
+			}
+		} else if LongFormat {
+			LongFormatDisplay(filepath + "/" + v)
+		}
+	}
+	fmt.Println()
+	for _, dir := range Directories {
+		OrangePrintln(dir)
+		RecursiveSearchDir(filepath + "/" + dir)
+	}
+}
+
+func NormalSearchDir(filepath string) {
+	var fileArray []string
+	files, err := os.ReadDir(filepath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, file := range files {
+		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
+			continue
+		}
+		if err != nil {
+			fmt.Println("STAT ERROR")
+			log.Fatal(err)
+		}
+		fileArray = append(fileArray, file.Name())
+	}
+
+	//* bubble sort the arrays and proceed
+	BubbleSort(fileArray)
+
+	for _, v := range fileArray {
+		todisplay := ""
+		filestat, err := os.Stat(filepath + "/" + v)
+		if err != nil {
+			fmt.Println("FILEARRAY ERR")
+			log.Fatal(err)
+		}
+		permissions, err := GetFilePermissions(filepath + "/" + v)
+		if permissions == "" {
+			log.Fatal(err)
+		}
+		if err != nil {
+			log.Fatal(err)
+		}
+		if !LongFormat {
+			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
+				todisplay = BlueFormat(v)
+				fmt.Print(todisplay + " ")
+			} else {
+				fmt.Print(filestat.Name() + " ")
+			}
+		} else if LongFormat {
+			LongFormatDisplay(filepath + "/" + v)
+		}
 	}
 	fmt.Println()
 }

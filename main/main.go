@@ -9,7 +9,7 @@ import (
 func main() {
 	terminalArgs := os.Args[1:]
 	if len(terminalArgs) == 0 {
-		log.Println("[USAGE]: go run . [OPTIONS] [FILES]")
+		log.Println("[USAGE]: ./ghostLS [OPTIONS] [FILES]")
 	}
 	mainargs := ghostls.ParseFlags(terminalArgs)
 	for _, terminalArgument := range mainargs {
