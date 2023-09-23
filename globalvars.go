@@ -6,4 +6,5 @@ var(
 	LongFormat = false
 	ReverseOrder = false
 	Timesort = false
+	FlagCounter = 0
 )

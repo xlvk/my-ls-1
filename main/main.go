@@ -2,16 +2,15 @@ package main
 
 import (
 	"ghostls"
-	"log"
 	"os"
 )
 
 func main() {
 	terminalArgs := os.Args[1:]
-	if len(terminalArgs) == 0 {
-		log.Println("[USAGE]: ./ghostLS [OPTIONS] [FILES]")
-	}
 	mainargs := ghostls.ParseFlags(terminalArgs)
+	if ghostls.FlagCounter == len(terminalArgs) || len(terminalArgs) == 0 {
+		mainargs = append(mainargs, ".")
+	}
 	for _, terminalArgument := range mainargs {
 		if ghostls.IsFlag(terminalArgument) {
 			continue

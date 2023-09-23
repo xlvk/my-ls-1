@@ -7,6 +7,7 @@ func IsFlag(s string) bool {
 func ParseFlags(args []string) []string {
 	for _, argument := range args {
 		if IsFlag(argument) {
+			FlagCounter++
 			switch argument {
 			case "-a":
 				DisplayHidden = true
