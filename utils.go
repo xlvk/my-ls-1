@@ -31,6 +31,16 @@ func BubbleSort(arr []string) {
 	}
 }
 
+func RevBubbleSort(arr []string) {
+	for i := 0; i < len(arr)-1; i++ {
+		for j := i + 1; j < len(arr); j++ {
+			if strings.ToLower(arr[i]) < strings.ToLower(arr[j]) {
+				arr[i], arr[j] = arr[j], arr[i]
+			}
+		}
+	}
+}
+
 //* parsing Binary permissions
 func GetFilePermissions(path string) (string, error) {
 	// Get file info

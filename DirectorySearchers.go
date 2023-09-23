@@ -30,8 +30,13 @@ func RecursiveSearchDir(filepath string) {
 	}
 
 	//* bubble sort the arrays and proceed
-	BubbleSort(fileArray)
-	BubbleSort(Directories)
+	if ReverseOrder {
+		RevBubbleSort(fileArray)
+		RevBubbleSort(Directories)
+	} else {
+		BubbleSort(fileArray)
+		BubbleSort(Directories)
+	}
 
 	for _, v := range fileArray {
 		todisplay := ""

@@ -14,6 +14,8 @@ func ParseFlags(args []string) []string {
 				RecursiveSearch = true
 			case "-l":
 				LongFormat = true
+			case "-r":
+				ReverseOrder = true
 			default:
 				continue
 			}
