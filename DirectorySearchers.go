@@ -7,8 +7,6 @@ import (
 	"strings"
 )
 
-// TODO: FIX BUG
-
 func RecursiveSearchDir(filepath string) {
 	var Directories []string
 	var fileArray []string
