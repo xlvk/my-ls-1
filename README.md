@@ -1,6 +1,6 @@
 # GhostLs (My-Ls-1)
 
-**project GhostLS aims to replicate the Infamous command `ls`, and some of its flags**
+**Project GhostLS aims to replicate the Infamous command `ls`, and some of its flags**
 
 Here is the file structure
 ```
