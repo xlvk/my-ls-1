@@ -1,5 +1,5 @@
 ghostLS:
-	go build -o GhostLs main/main.go
+	go build -o myLs main/main.go
 
 clean:
 	rm -rf GhostLs

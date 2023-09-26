@@ -12,9 +12,10 @@ func main() {
 		mainargs = append(mainargs, ".")
 	}
 	for _, terminalArgument := range mainargs {
-		if ghostls.IsFlag(terminalArgument) {
+		if ghostls.IsSingleFlag(terminalArgument) ||ghostls.IsMultiFlag(terminalArgument) {
 			continue
 		}
+
 		if ghostls.RecursiveSearch {
 			ghostls.RecursiveSearchDir(terminalArgument)
 		} else {

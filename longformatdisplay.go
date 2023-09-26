@@ -34,7 +34,10 @@ func LongFormatDisplay(filepath string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	filerecord += uname + " " + gname + " "
+	filerecord += uname + " "
+	if !DashO {
+		filerecord += gname + " "
+	}
 	//* parse file size
 	filerecord += strconv.Itoa(int(filestats.Size())) + " "
 	//* parse last mod date and time

@@ -62,14 +62,14 @@ func RecursiveSearchDir(filepath string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if !LongFormat {
+		if !LongFormat && !DashO {
 			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
 				todisplay = BlueFormat(v)
 				fmt.Print(todisplay + " ")
 			} else {
 				fmt.Print(filestat.Name() + " ")
 			}
-		} else if LongFormat {
+		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
 		}
 	}
@@ -126,14 +126,14 @@ func NormalSearchDir(filepath string) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if !LongFormat {
+		if !LongFormat && !DashO {
 			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
 				todisplay = BlueFormat(v)
 				fmt.Print(todisplay + " ")
 			} else {
 				fmt.Print(filestat.Name() + " ")
 			}
-		} else if LongFormat {
+		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
 		}
 	}
