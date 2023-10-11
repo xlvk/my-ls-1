@@ -177,3 +177,24 @@ func lookupGroupById(gid uint32) (string, error) {
 	}
 	return g.Name, nil
 }
+
+func GetBlockCount(directoryPath string) (int64, error) {
+	// Open the directory
+	dir, err := os.Open(directoryPath)
+	if err != nil {
+		return 0, err
+	}
+	defer dir.Close()
+
+	// Get the directory file information
+	dirInfo, err := dir.Stat()
+	if err != nil {
+		return 0, err
+	}
+
+	// Get the underlying syscall.Stat_t structure
+	stat := dirInfo.Sys().(*syscall.Stat_t)
+
+	// Return the block count
+	return stat.Blocks, nil
+}

@@ -44,7 +44,7 @@ func LongFormatDisplay(filepath string) {
 	modtime := filestats.ModTime()
 	_, month, day := modtime.Date()
 	hour, min, _ := modtime.Clock()
-	filerecord += month.String() + " " + strconv.Itoa(day) + " " + strconv.Itoa(hour) + ":" + strconv.Itoa(min) + " "
+	filerecord += string([]rune(month.String())[:3]) + " " + strconv.Itoa(day) + " " + strconv.Itoa(hour) + ":" + strconv.Itoa(min) + " "
 	var mainname string
 	if filestats.IsDir() || filepermissions == "rwx-rwx-r-x" {
 		mainname = BlueFormat(filestats.Name())

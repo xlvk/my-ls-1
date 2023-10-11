@@ -1,9 +1,15 @@
 package main
 
 import (
+	"fmt"
 	"ghostls"
+	"log"
 	"os"
 )
+
+//TODO: Fix Block count func
+//TODO: handle colors
+//TODO: optimize search algorithm
 
 func main() {
 	terminalArgs := os.Args[1:]
@@ -12,14 +18,34 @@ func main() {
 		mainargs = append(mainargs, ".")
 	}
 	for _, terminalArgument := range mainargs {
-		if ghostls.IsSingleFlag(terminalArgument) ||ghostls.IsMultiFlag(terminalArgument) {
+		checkisfile, err := os.Stat(terminalArgument)
+
+		if ghostls.IsSingleFlag(terminalArgument) || ghostls.IsMultiFlag(terminalArgument) {
 			continue
 		}
 
-		if ghostls.RecursiveSearch {
-			ghostls.RecursiveSearchDir(terminalArgument)
-		} else {
-			ghostls.NormalSearchDir(terminalArgument)
+		if err != nil {
+			log.Fatal(err)
 		}
+
+		if !checkisfile.IsDir() {
+			fmt.Println(terminalArgument)
+			fmt.Println()
+		} else {
+			fmt.Println(terminalArgument + ":")
+			BlockCount, e := ghostls.GetBlockCount(terminalArgument)
+			if ghostls.LongFormat {
+				fmt.Println("total", BlockCount)
+			}
+			if e != nil {
+				log.Fatal(e)
+			}
+			if ghostls.RecursiveSearch {
+				ghostls.RecursiveSearchDir(terminalArgument)
+			} else {
+				ghostls.NormalSearchDir(terminalArgument)
+			}
+		}
+
 	}
 }
