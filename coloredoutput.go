@@ -2,7 +2,6 @@ package ghostls
 
 import (
 	"fmt"
-	// "path/filepath"
 )
 
 const (
@@ -77,5 +76,4 @@ func getColorizedFileType(fileType, FileName string) string {
 		colorCode = resetANSI
 	}
 	return colorCode + boldANSI + fmt.Sprintf("%s", FileName) + resetANSI
-	// return fmt.Sprintf("%s%s%s\n", colorCode, boldANSI, fileType)
 }

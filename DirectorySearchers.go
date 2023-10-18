@@ -49,13 +49,11 @@ func RecursiveSearchDir(filepath string) {
 		}
 	}
 	maxLength := 0
-	// AllLength := 0
 	for _, file := range fileArray {
 		length := len(file)
 		if length > maxLength {
 			maxLength = length
 		}
-		// AllLength += length
 	}
 
 	terminalWidth := TCmond()
@@ -83,7 +81,6 @@ func RecursiveSearchDir(filepath string) {
 				extension := path.Ext(string(v))
 				todisplay = getColorizedFileType(extension, string(v))
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
-				// fmt.Print(filestat.Name() + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
@@ -133,13 +130,11 @@ func NormalSearchDir(filepath string) {
 	}
 
 	maxLength := 0
-	// AllLength := 0
 	for _, file := range fileArray {
 		length := len(file)
 		if length > maxLength {
 			maxLength = length
 		}
-		// AllLength += length
 	}
 
 	terminalWidth := TCmond()
@@ -168,7 +163,6 @@ func NormalSearchDir(filepath string) {
 				extension := path.Ext(string(v))
 				todisplay = getColorizedFileType(extension, string(v))
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
-				// fmt.Print(filestat.Name() + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
