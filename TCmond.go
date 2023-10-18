@@ -2,26 +2,39 @@ package ghostls
 
 import (
 	"fmt"
-	"log"
 	"os"
-	"os/exec"
-	"strconv"
-	"strings"
+	"syscall"
+	"unsafe"
 )
 
 func TCmond() int {
-	cmd := exec.Command("stty", "size")
-	cmd.Stdin = os.Stdin
-	out, err := cmd.Output()
-	if err != nil {
+	var dimensions [4]uint16
+
+	// Convert the dimensions array to a uintptr, which is safe
+	dimensionsPtr := uintptr(unsafe.Pointer(&dimensions[0]))
+
+	_, _, err := syscall.Syscall(syscall.SYS_IOCTL, os.Stdin.Fd(), uintptr(syscall.TIOCGWINSZ), dimensionsPtr)
+	if err != 0 {
 		fmt.Println(err)
+		os.Exit(1)
 	}
-	s := string(out)
-	s = strings.TrimSpace(s)
-	sArr := strings.Split(string(s), " ")
-	widthh, err1 := strconv.Atoi(string(sArr[1]))
-	if err1 != nil {
-		log.Fatal(err)
+	width := int(dimensions[1])
+	return width
+}
+
+
+func getExtension(filename string) string {
+	lastDotIndex := -1
+	for i := len(filename) - 1; i >= 0; i-- {
+		if filename[i] == '.' {
+			lastDotIndex = i
+			break
+		}
 	}
-	return widthh
+
+	if lastDotIndex == -1 || lastDotIndex == len(filename)-1 {
+		return ""
+	}
+
+	return filename[lastDotIndex:]
 }

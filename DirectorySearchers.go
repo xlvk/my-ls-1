@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"path"
 	"strings"
 )
 
@@ -78,7 +77,8 @@ func RecursiveSearchDir(filepath string) {
 				todisplay = BlueFormat(v)
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			} else {
-				extension := path.Ext(string(v))
+				extension := getExtension(string(v))
+				fmt.Println(extension)
 				todisplay = getColorizedFileType(extension, string(v))
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			}
@@ -160,7 +160,8 @@ func NormalSearchDir(filepath string) {
 				todisplay = BlueFormat(v)
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			} else {
-				extension := path.Ext(string(v))
+				extension := getExtension(string(v))
+				fmt.Println(extension)
 				todisplay = getColorizedFileType(extension, string(v))
 				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			}
