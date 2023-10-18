@@ -1,11 +1,11 @@
 package ghostls
 
-var(
-	DisplayHidden = false
+var (
+	DisplayHidden   = false
 	RecursiveSearch = false
-	LongFormat = false
-	ReverseOrder = false
-	Timesort = false
-	DashO = false
-	FlagCounter = 0
+	LongFormat      = false
+	ReverseOrder    = false
+	Timesort        = false
+	DashO           = false
+	FlagCounter     = 0
 )

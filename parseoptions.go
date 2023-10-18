@@ -10,14 +10,13 @@ func IsSingleFlag(s string) bool {
 func IsMultiFlag(s string) bool {
 	_, err := os.Stat(s)
 
-	if err != nil && !os.IsNotExist(err)  {
+	if err != nil && !os.IsNotExist(err) {
 		RedPrintln(err)
 		return false
 	}
 
 	return true && os.IsNotExist(err) && s[0] == '-'
 }
-
 
 func ParseFlags(args []string) []string {
 	for _, argument := range args {
@@ -39,7 +38,7 @@ func ParseFlags(args []string) []string {
 			default:
 				continue
 			}
-		} else if IsMultiFlag(argument){
+		} else if IsMultiFlag(argument) {
 			FlagCounter++
 			runeArray := []rune(argument)
 			for _, v := range runeArray[1:] {

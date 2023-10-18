@@ -9,7 +9,7 @@ import (
 
 // TODO: INTENSIVE TESTING REQUIRED
 
-//* formatting output
+// * formatting output
 func LongFormatDisplay(filepath string) {
 	filestats, err := os.Stat(filepath)
 	if err != nil {

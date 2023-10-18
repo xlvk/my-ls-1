@@ -76,7 +76,7 @@ func RevBubbleSort(arr []string) {
 	}
 }
 
-//* parsing Binary permissions
+// * parsing Binary permissions
 func GetFilePermissions(path string) (string, error) {
 	// Get file info
 	fileInfo, err := os.Stat(path)
@@ -121,7 +121,7 @@ func GetFilePermissions(path string) (string, error) {
 	}
 }
 
-//* syscall to get hard link numbers
+// * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
 	fcount := uint64(0)
 

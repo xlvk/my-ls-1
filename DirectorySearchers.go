@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path"
 	"strings"
 )
 
@@ -47,8 +48,19 @@ func RecursiveSearchDir(filepath string) {
 			Directories = SortByCreationTime(filepath, Directories, false)
 		}
 	}
+	maxLength := 0
+	// AllLength := 0
+	for _, file := range fileArray {
+		length := len(file)
+		if length > maxLength {
+			maxLength = length
+		}
+		// AllLength += length
+	}
 
-	for _, v := range fileArray {
+	terminalWidth := TCmond()
+	numColumns := terminalWidth / (maxLength + 4)
+	for i, v := range fileArray {
 		todisplay := ""
 		filestat, err := os.Stat(filepath + "/" + v)
 		if err != nil {
@@ -63,16 +75,24 @@ func RecursiveSearchDir(filepath string) {
 			log.Fatal(err)
 		}
 		if !LongFormat && !DashO {
+			padding := maxLength - len(string(v)) + 4
 			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
 				todisplay = BlueFormat(v)
-				fmt.Print(todisplay + " ")
+				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			} else {
-				fmt.Print(filestat.Name() + " ")
+				extension := path.Ext(string(v))
+				todisplay = getColorizedFileType(extension, string(v))
+				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				// fmt.Print(filestat.Name() + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
 		}
+		if (i+1)%numColumns == 0 {
+			fmt.Println()
+		}
 	}
+
 	fmt.Println()
 	for _, dir := range Directories {
 		OrangePrintln(dir)
@@ -112,7 +132,20 @@ func NormalSearchDir(filepath string) {
 		}
 	}
 
-	for _, v := range fileArray {
+	maxLength := 0
+	// AllLength := 0
+	for _, file := range fileArray {
+		length := len(file)
+		if length > maxLength {
+			maxLength = length
+		}
+		// AllLength += length
+	}
+
+	terminalWidth := TCmond()
+	numColumns := terminalWidth / (maxLength + 4)
+
+	for i, v := range fileArray {
 		todisplay := ""
 		filestat, err := os.Stat(filepath + "/" + v)
 		if err != nil {
@@ -127,14 +160,21 @@ func NormalSearchDir(filepath string) {
 			log.Fatal(err)
 		}
 		if !LongFormat && !DashO {
+			padding := maxLength - len(string(v)) + 4
 			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
 				todisplay = BlueFormat(v)
-				fmt.Print(todisplay + " ")
+				fmt.Print(todisplay + strings.Repeat(" ", padding))
 			} else {
-				fmt.Print(filestat.Name() + " ")
+				extension := path.Ext(string(v))
+				todisplay = getColorizedFileType(extension, string(v))
+				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				// fmt.Print(filestat.Name() + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
+		}
+		if (i+1)%numColumns == 0 {
+			fmt.Println()
 		}
 	}
 	fmt.Println()
