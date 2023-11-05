@@ -52,28 +52,16 @@ func getColorizedFileType(fileType, FileName string) string {
 	var colorCode string
 
 	switch fileType {
-	case ".txt", ".doc", ".docx", ".pdf":
-		colorCode = blueANSI
 	case ".jpg", ".png", ".gif", ".bmp":
-		colorCode = magentaANSI
+		colorCode = magentaANSI + boldANSI
 	case ".mp4", ".avi", ".mov", ".wmv":
-		colorCode = redANSI
+		colorCode = magentaANSI + boldANSI
 	case ".mp3", ".wav", ".flac", ".aac":
-		colorCode = yellowANSI
+		colorCode = cyanANSI + boldANSI
 	case ".zip", ".rar", ".tar.gz", ".7z":
-		colorCode = cyanANSI
-	case ".xls", ".xlsx", ".csv":
-		colorCode = greenANSI
-	case ".ppt", ".pptx":
-		colorCode = magentaANSI
-	case ".go", ".java", ".py", ".cpp":
-		colorCode = yellowANSI
-	case ".html", ".css", ".js", ".xml":
-		colorCode = blueANSI
-	case ".exe", ".app", ".sh", ".bat":
-		colorCode = redANSI
+		colorCode = redANSI + boldANSI
 	default:
 		colorCode = resetANSI
 	}
-	return colorCode + boldANSI + fmt.Sprintf("%s", FileName) + resetANSI
+	return colorCode + FileName + resetANSI
 }

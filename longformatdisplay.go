@@ -50,6 +50,8 @@ func LongFormatDisplay(filepath string) {
 		mainname = BlueFormat(filestats.Name())
 	} else {
 		mainname = filestats.Name()
+		extension := getExtension(mainname)
+		mainname = getColorizedFileType(extension, mainname)
 	}
 	filerecord += mainname
 	fmt.Println(filerecord)

@@ -115,9 +115,9 @@ func GetFilePermissions(path string) (string, error) {
 	dirbool := fileInfo.IsDir()
 	// Return the formatted permissions
 	if dirbool {
-		return "d" + fmt.Sprintf("%s-%s-%s", ownerPermissions, groupPermissions, otherPermissions), nil
+		return "d" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), nil
 	} else {
-		return fmt.Sprintf("%s-%s-%s", ownerPermissions, groupPermissions, otherPermissions), nil
+		return fmt.Sprintf("-%s%s%s", ownerPermissions, groupPermissions, otherPermissions), nil
 	}
 }
 

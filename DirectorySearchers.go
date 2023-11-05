@@ -20,8 +20,19 @@ func RecursiveSearchDir(filepath string) {
 		}
 		fileinfo, err := os.Stat(filepath + "/" + file.Name())
 		if err != nil {
-			fmt.Println("STAT ERROR")
-			log.Fatal(err)
+			info, e := file.Info()
+			if e != nil {
+				log.Fatal("Lstat ERR: " + e.Error())
+			}
+			if info.Mode()&os.ModeSymlink != 0 {
+				continue
+			}
+			if DisplayHidden {
+				continue
+			} else {
+				fmt.Println("STAT ERROR")
+				log.Fatal(err)
+			}
 		}
 		if fileinfo.IsDir() {
 			Directories = append(Directories, file.Name())
@@ -55,9 +66,7 @@ func RecursiveSearchDir(filepath string) {
 		}
 	}
 
-	terminalWidth := TCmond()
-	numColumns := terminalWidth / (maxLength + 4)
-	for i, v := range fileArray {
+	for _, v := range fileArray {
 		todisplay := ""
 		filestat, err := os.Stat(filepath + "/" + v)
 		if err != nil {
@@ -65,35 +74,28 @@ func RecursiveSearchDir(filepath string) {
 			log.Fatal(err)
 		}
 		permissions, err := GetFilePermissions(filepath + "/" + v)
-		if permissions == "" {
-			log.Fatal(err)
-		}
 		if err != nil {
 			log.Fatal(err)
 		}
+		// check formatting
 		if !LongFormat && !DashO {
-			padding := maxLength - len(string(v)) + 4
-			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
+			if filestat.IsDir() || permissions[0] == 'd' {
 				todisplay = BlueFormat(v)
-				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				fmt.Print(todisplay + " ")
 			} else {
 				extension := getExtension(string(v))
 				fmt.Println(extension)
 				todisplay = getColorizedFileType(extension, string(v))
-				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				fmt.Print(todisplay + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
 		}
-		if (i+1)%numColumns == 0 {
-			fmt.Println()
-		}
 	}
-
-	fmt.Println()
 	for _, dir := range Directories {
 		OrangePrintln(dir)
-		RecursiveSearchDir(filepath + "/" + dir)
+		mainPath := filepath + "/" + dir
+		RecursiveSearchDir(mainPath)
 	}
 }
 
@@ -108,6 +110,13 @@ func NormalSearchDir(filepath string) {
 			continue
 		}
 		if err != nil {
+			info, e := file.Info()
+			if e != nil {
+				log.Fatal("Lstat ERR: " + e.Error())
+			}
+			if info.Mode()&os.ModeSymlink != 0 {
+				continue
+			}
 			fmt.Println("STAT ERROR")
 			log.Fatal(err)
 		}
@@ -137,10 +146,7 @@ func NormalSearchDir(filepath string) {
 		}
 	}
 
-	terminalWidth := TCmond()
-	numColumns := terminalWidth / (maxLength + 4)
-
-	for i, v := range fileArray {
+	for _, v := range fileArray {
 		todisplay := ""
 		filestat, err := os.Stat(filepath + "/" + v)
 		if err != nil {
@@ -155,21 +161,17 @@ func NormalSearchDir(filepath string) {
 			log.Fatal(err)
 		}
 		if !LongFormat && !DashO {
-			padding := maxLength - len(string(v)) + 4
+			// padding := maxLength - len(string(v)) + 4
 			if filestat.IsDir() || permissions == "rwx-rwx-r-x" {
 				todisplay = BlueFormat(v)
-				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				fmt.Print(todisplay + " ")
 			} else {
 				extension := getExtension(string(v))
-				fmt.Println(extension)
 				todisplay = getColorizedFileType(extension, string(v))
-				fmt.Print(todisplay + strings.Repeat(" ", padding))
+				fmt.Print(todisplay + " ")
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(filepath + "/" + v)
-		}
-		if (i+1)%numColumns == 0 {
-			fmt.Println()
 		}
 	}
 	fmt.Println()
