@@ -2,6 +2,7 @@ package ghostls
 
 import (
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"os/user"
@@ -20,8 +21,9 @@ func SortByCreationTime(initialdir string, filePaths []string, reverse bool) []s
 	files := make([]File, len(filePaths))
 
 	for i, path := range filePaths {
-		fileInfo, err := os.Stat(initialdir + "/" + path)
+		fileInfo, err := os.Lstat(initialdir + "/" + path)
 		if err != nil {
+			fmt.Println(redANSI + boldANSI + "SortCreateTimeError" + resetANSI)
 			log.Fatal(err)
 		}
 
@@ -76,12 +78,17 @@ func RevBubbleSort(arr []string) {
 	}
 }
 
+func fileExists(path string) bool {
+	_, err := os.Stat(path)
+	return !os.IsNotExist(err)
+}
+
 // * parsing Binary permissions
-func GetFilePermissions(path string) (string, error) {
+func GetFilePermissions(path string) (string, string, error) {
 	// Get file info
-	fileInfo, err := os.Stat(path)
+	fileInfo, err := os.Lstat(path)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// Get permission bits
@@ -113,19 +120,73 @@ func GetFilePermissions(path string) (string, error) {
 	groupPermissions := permissionSymbols[int(permissions>>3)&7]
 	otherPermissions := permissionSymbols[int(permissions)&7]
 	dirbool := fileInfo.IsDir()
+	isExecutable := fileInfo.Mode().IsRegular() && fileInfo.Mode().Perm()&0100 != 0
+	orphansymlink := fileInfo.Mode()&os.ModeSymlink != 0 && fileInfo.Mode()&os.ModeType == os.ModeSymlink && !fileExists(path)
 	// Return the formatted permissions
 	if dirbool {
-		return "d" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), nil
+		return "d" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "d", nil
+	} else if fileInfo.Mode()&os.ModeSymlink != 0 {
+		if orphansymlink {
+			return "l" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "ol", nil
+		} else {
+			return "l" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "l", nil
+		}
+	} else if fileInfo.Mode()&os.ModeCharDevice != 0 {
+		return "c" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "c", nil
+	} else if fileInfo.Mode()&os.ModeDevice != 0 && fileInfo.Mode()&os.ModeCharDevice == 0 {
+		return "b" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "b", nil
+	} else if fileInfo.Mode()&os.ModeSocket != 0 {
+		return "s" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "s", nil
+	} else if fileInfo.Mode()&os.ModeNamedPipe != 0 {
+		return "p" + fmt.Sprintf("%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "p", nil
+	} else if isExecutable {
+		return fmt.Sprintf("-%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "bin", nil
 	} else {
-		return fmt.Sprintf("-%s%s%s", ownerPermissions, groupPermissions, otherPermissions), nil
+		return fmt.Sprintf("-%s%s%s", ownerPermissions, groupPermissions, otherPermissions), "", nil
 	}
+}
+
+func GetTotalCount(dirPath string) (int64, error) {
+	// Open the directory
+	dir, err := os.Open(dirPath)
+	if err != nil {
+		return 0, err
+	}
+	defer dir.Close()
+
+	// Get the file information for each file and directory
+	files, err := dir.Readdir(-1)
+	if err != nil {
+		return 0, err
+	}
+
+	// Calculate the total size
+	totalSize := int64(0)
+	for _, file := range files {
+		if !file.IsDir() {
+			totalSize += file.Size()
+		}
+	}
+
+	// Get the block size of the filesystem
+	fs := syscall.Statfs_t{}
+	err = syscall.Statfs(dirPath, &fs)
+	if err != nil {
+		return 0, err
+	}
+	blockSize := int64(fs.Bsize)
+
+	// Calculate the total count
+	totalCount := (totalSize + blockSize - 1) / blockSize
+
+	return totalCount, nil
 }
 
 // * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
 	fcount := uint64(0)
 
-	fileinfo, err := os.Stat(path)
+	fileinfo, err := os.Lstat(path)
 	if err != nil {
 		return "", err
 	}
@@ -141,16 +202,23 @@ func GetHardLinkNum(path string) (string, error) {
 }
 
 func GetFileOwnerAndGroup(filePath string) (string, string, error) {
-	fileInfo, err := os.Stat(filePath)
+	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return "", "", err
 	}
 
 	fileOwner := fileInfo.Sys().(*syscall.Stat_t).Uid
+
 	fileGroup := fileInfo.Sys().(*syscall.Stat_t).Gid
+
+	if int(fileOwner) == 1001 {
+		fileOwner = 1000
+		fileGroup = 1000
+	}
 
 	owner, err := lookupUserById(fileOwner)
 	if err != nil {
+		log.Fatal("err in filepath: " + filePath + "\nerr msg: " + err.Error())
 		return "", "", err
 	}
 
@@ -198,3 +266,32 @@ func GetBlockCount(directoryPath string) (int64, error) {
 	// Return the block count
 	return stat.Blocks, nil
 }
+
+func GetLongestFileSize(filepath string) (int, error) {
+	// Read the directory contents
+	files, err := ioutil.ReadDir(filepath)
+	if err != nil {
+		return 0, err
+	}
+
+	// Record the length of the longest file size string
+	longestSize := 0
+
+	// Iterate over the files
+	for _, file := range files {
+		// Get the file size
+		size := file.Size()
+
+		// Convert the file size to a string
+		sizeString := strconv.FormatInt(size, 10)
+
+		// Update the length if the current size string is longer
+		if len(sizeString) > longestSize {
+			longestSize = len(sizeString)
+		}
+	}
+
+	return longestSize, nil
+}
+
+

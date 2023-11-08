@@ -14,6 +14,7 @@ const (
 	resetANSI   string = "\033[0m"
 	magentaANSI string = "\u001b[35m"
 	cyanANSI    string = "\u001b[36m"
+	blackBgANSI string = "\033[40m"
 )
 
 func YellowPrintln(args ...any) {
@@ -44,8 +45,11 @@ func OrangePrintln(args ...any) {
 	fmt.Println(resetANSI)
 }
 
-func BlueFormat(args ...any) string {
-	return blueANSI + boldANSI + fmt.Sprintf("%s", args[0]) + resetANSI
+func BlueFormat(argumet string) string {
+	return blueANSI + boldANSI + argumet + resetANSI
+}
+func GreenFormat(argumet string) string {
+	return greenANSI + boldANSI + argumet + resetANSI
 }
 
 func getColorizedFileType(fileType, FileName string) string {
@@ -57,7 +61,7 @@ func getColorizedFileType(fileType, FileName string) string {
 	case ".mp4", ".avi", ".mov", ".wmv":
 		colorCode = magentaANSI + boldANSI
 	case ".mp3", ".wav", ".flac", ".aac":
-		colorCode = cyanANSI + boldANSI
+		colorCode = cyanANSI
 	case ".zip", ".rar", ".tar.gz", ".7z":
 		colorCode = redANSI + boldANSI
 	default:

@@ -18,7 +18,7 @@ func main() {
 		mainargs = append(mainargs, ".")
 	}
 	for _, terminalArgument := range mainargs {
-		checkisfile, err := os.Stat(terminalArgument)
+		checkisfile, err := os.Lstat(terminalArgument)
 
 		if ghostls.IsSingleFlag(terminalArgument) || ghostls.IsMultiFlag(terminalArgument) {
 			continue
@@ -29,23 +29,14 @@ func main() {
 		}
 
 		if !checkisfile.IsDir() {
-			fmt.Println(terminalArgument)
-			fmt.Println()
-		} else {
-			fmt.Println(terminalArgument + ":")
-			BlockCount, e := ghostls.GetBlockCount(terminalArgument)
 			if ghostls.LongFormat {
-				fmt.Println("total", BlockCount)
-			}
-			if e != nil {
-				log.Fatal(e)
-			}
-			if ghostls.RecursiveSearch {
-				ghostls.RecursiveSearchDir(terminalArgument)
+				ghostls.LongFormatDisplay(terminalArgument)
 			} else {
-				ghostls.NormalSearchDir(terminalArgument)
+				fmt.Println(terminalArgument)
 			}
+		} else {
+			ghostls.DirSearcher(terminalArgument)
+			fmt.Println()
 		}
-
 	}
 }

@@ -8,4 +8,5 @@ var (
 	Timesort        = false
 	DashO           = false
 	FlagCounter     = 0
+	LongS           = 0
 )
