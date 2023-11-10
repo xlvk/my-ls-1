@@ -185,7 +185,7 @@ func GetTotalCount(dirPath string) (int64, error) {
 
 // * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
-	fcount := uint16(0)
+	fcount := uint64(0)
 
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
