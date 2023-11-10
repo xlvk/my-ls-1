@@ -22,13 +22,13 @@ func DirSearcher(orgPath string) {
 		fmt.Println(redANSI + boldANSI + "Error Searching Directory" + resetANSI)
 		log.Fatal(err)
 	}
-	if LongFormat|| DashO {
-		bcount, err := GetBlockCount(orgPath)
+	if LongFormat || DashO {
+		bcount, err := GetBlocksOccupied(orgPath)
 		if err != nil {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
 		}
-		fmt.Println("total "+  strconv.Itoa(int(bcount)))
+		fmt.Println("total " + strconv.FormatInt(bcount, 10))
 	}
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
@@ -65,32 +65,46 @@ func DirSearcher(orgPath string) {
 		}
 	}
 	//* parse and print
-	for _, v := range fileArray {
+	for i, v := range fileArray {
 		todisplay := ""
-		filestat, err := os.Lstat(orgPath + "/" + v)
-		if err != nil {
-			fmt.Println(redANSI + boldANSI + "Error getting file Info for print")
-			log.Fatal(err)
-		}
-
-		_, dirbool, err := GetFilePermissions(orgPath + "/" + v)
+		_, typePool, err := GetFilePermissions(orgPath + "/" + v)
 		if err != nil {
 			fmt.Println(redANSI + boldANSI + "DirSearch Error, cant get permissions")
 			log.Fatal(err)
 		}
 		if !LongFormat && !DashO {
-			if filestat.IsDir() || dirbool == "d" {
-				fmt.Print(BlueFormat(v) + " ")
-			} else {
+			switch typePool {
+			case "d":
+				todisplay = blueANSI + boldANSI + v + resetANSI
+			case "l":
+				todisplay = cyanANSI + boldANSI + v + resetANSI
+			case "ol":
+				//* symlink that points to a file that doesnt exist
+				todisplay = blackBgANSI + redANSI + boldANSI + v + resetANSI
+			case "c", "b":
+				todisplay = blackBgANSI + yellowANSI + boldANSI + v + resetANSI
+			case "p":
+				todisplay = blackBgANSI + yellowANSI + v + resetANSI
+			case "s":
+				todisplay = magentaANSI + v + resetANSI
+			case "bin":
+				todisplay = greenANSI + boldANSI + v + resetANSI
+			default:
 				extension := getExtension(string(v))
-				fmt.Println(extension)
 				todisplay = getColorizedFileType(extension, string(v))
-				fmt.Print(todisplay + " ")
+			}
+
+			fmt.Print(todisplay + "  ")
+
+			if i%8 == 0 && i!= 0{
+				fmt.Println()
 			}
 		} else if LongFormat || DashO {
 			LongFormatDisplay(orgPath + "/" + v)
 		}
 	}
+
+	fmt.Println()
 	//* Handle recursive search
 	if RecursiveSearch {
 		for _, dir := range Directories {

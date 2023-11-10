@@ -294,4 +294,86 @@ func GetLongestFileSize(filepath string) (int, error) {
 	return longestSize, nil
 }
 
+func GetTotalDiskAllocation(dirPath string) (int64, error) {
+	var totalAllocation int64
+
+	err := VisitDir(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			log.Println(err)
+			return nil
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Get the file size
+		file, err := os.Stat(path)
+		if err != nil {
+			return err
+		}
+		size := file.Size()
+
+		totalAllocation += size
+
+		return nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return totalAllocation, nil
+}
+
+func VisitDir(dirPath string, walkFn func(path string, info os.FileInfo, err error) error) error {
+	file, err := os.Open(dirPath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	entries, err := file.Readdir(-1)
+	if err != nil {
+		return err
+	}
+
+	for _, entry := range entries {
+		entryPath := dirPath + "/" + entry.Name()
+
+		if entry.IsDir() {
+			err := VisitDir(entryPath, walkFn)
+			if err != nil {
+				return err
+			}
+		} else {
+			err := walkFn(entryPath, entry, nil)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func GetBlocksOccupied(filePath string) (int64, error) {
+	fileInfo, err := os.Lstat(filePath)
+	if err != nil {
+		return 0, err
+	}
+
+	stat, ok := fileInfo.Sys().(*syscall.Stat_t)
+	if !ok {
+		return 0, fmt.Errorf("failed to retrieve file information")
+	}
+
+	blockSize := stat.Blksize
+	// fileSize := fileInfo.Size()
+	// blocksOccupied := (fileSize + int64(blockSize) - 1) / int64(blockSize)
+
+	return blockSize, nil
+}
+
 

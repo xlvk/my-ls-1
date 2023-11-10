@@ -38,6 +38,9 @@ func LongFormatDisplay(filepath string) {
 		RedPrintln("-L HARDLINKNUM ERROR")
 		log.Fatal(err)
 	}
+	if len(hardlinknum) < 2 {
+		hardlinknum = " " + hardlinknum
+	}
 	filerecord += hardlinknum + " "
 	//* parse owner name and group name
 	uname, gname, err := GetFileOwnerAndGroup(filepath)
@@ -45,7 +48,7 @@ func LongFormatDisplay(filepath string) {
 		RedPrintln("-L UNAME ERROR")
 		log.Fatal(err)
 	}
-	filerecord += uname + " "
+	filerecord += " "+ uname + " "
 	if !DashO {
 		filerecord += gname + " "
 	}
@@ -57,13 +60,17 @@ func LongFormatDisplay(filepath string) {
 	_, month, day := modtime.Date()
 	hour, min, _ := modtime.Clock()
 	mainMin := strconv.Itoa(min)
+	mainHr := strconv.Itoa(hour)
 	if min < 10 {
 		mainMin = "0" + mainMin
 	}
+	if hour < 10 {
+		mainHr = "0" + mainHr
+	}
 	if len(strconv.Itoa(day)) < 2 {
-		filerecord += string([]rune(month.String())[:3]) + "  " + strconv.Itoa(day) + " " + strconv.Itoa(hour) + ":" + mainMin + " "
+		filerecord += string([]rune(month.String())[:3]) + "  " + strconv.Itoa(day) + " " + mainHr + ":" + mainMin + " "
 	} else {
-		filerecord += string([]rune(month.String())[:3]) + " " + strconv.Itoa(day) + " " + strconv.Itoa(hour) + ":" + mainMin + " "
+		filerecord += string([]rune(month.String())[:3]) + " " + strconv.Itoa(day) + " " + mainHr + ":" + mainMin + " "
 	}
 	var mainname string
 	switch ftype {
