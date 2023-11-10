@@ -28,7 +28,7 @@ func DirSearcher(orgPath string) {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
 		}
-		fmt.Println("total " + strconv.FormatInt(bcount, 10))
+		fmt.Println("total " + strconv.FormatInt(int64(bcount), 10))
 	}
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
@@ -96,7 +96,7 @@ func DirSearcher(orgPath string) {
 
 			fmt.Print(todisplay + "  ")
 
-			if i%8 == 0 && i!= 0{
+			if i%8 == 0 && i != 0 {
 				fmt.Println()
 			}
 		} else if LongFormat || DashO {

@@ -2,10 +2,11 @@ package ghostls
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"log"
 	"os"
 	"os/user"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -184,7 +185,7 @@ func GetTotalCount(dirPath string) (int64, error) {
 
 // * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
-	fcount := uint64(0)
+	fcount := uint16(0)
 
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
@@ -269,7 +270,19 @@ func GetBlockCount(directoryPath string) (int64, error) {
 
 func GetLongestFileSize(filepath string) (int, error) {
 	// Read the directory contents
-	files, err := ioutil.ReadDir(filepath)
+	files, err := func() ([]fs.FileInfo, error) {
+		f, err := os.Open(filepath)
+		if err != nil {
+			return nil, err
+		}
+		list, err := f.Readdir(-1)
+		f.Close()
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+		return list, nil
+	}()
 	if err != nil {
 		return 0, err
 	}
@@ -358,7 +371,8 @@ func VisitDir(dirPath string, walkFn func(path string, info os.FileInfo, err err
 	return nil
 }
 
-func GetBlocksOccupied(filePath string) (int64, error) {
+func GetBlocksOccupied(filePath string) (int32, error) {
+
 	fileInfo, err := os.Lstat(filePath)
 	if err != nil {
 		return 0, err
@@ -375,5 +389,3 @@ func GetBlocksOccupied(filePath string) (int64, error) {
 
 	return blockSize, nil
 }
-
-
