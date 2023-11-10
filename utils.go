@@ -247,16 +247,26 @@ func lookupGroupById(gid uint32) (string, error) {
 	return g.Name, nil
 }
 
-func getblockcount(filePaths []string) (int64, error) {
+func GetBlockCount(filePaths []string) (int64, error) {
 	var totalBlocks int64
 	for _, path := range filePaths {
-		fileInfo, err := os.Stat(path)
+		fileInfo, err := os.Lstat(path) // Use Lstat instead of Stat
 		if err != nil {
-			return 0, err // handle the error appropriately
+			return 0, fmt.Errorf("error getting file info for %s: %w", path, err)
 		}
 
-		if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-			totalBlocks += stat.Blocks
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			// For symlinks, you might choose to ignore them or handle differently.
+			// Currently skipping symlinks. If you want to count the blocks of the file the symlink points to,
+			// you'll need to resolve the symlink and then use os.Stat on the resolved path.
+			continue
+		} else {
+			// Handle regular file case
+			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
+				totalBlocks += stat.Blocks
+			} else {
+				return 0, fmt.Errorf("could not assert type *syscall.Stat_t for file %s", path)
+			}
 		}
 	}
 	return totalBlocks, nil
