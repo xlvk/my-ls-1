@@ -11,7 +11,25 @@ import (
 func DirSearcher(orgPath string) {
 	var Directories []string
 	var fileArray []string
-	files, err := os.ReadDir(orgPath)
+	var filePaths []string
+	dir, err := os.Open(orgPath)
+	if err != nil {
+		fmt.Println("Error opening directory:", err)
+		return
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdir(-1) // -1 to read all files
+	if err != nil {
+		fmt.Println("Error reading directory contents:", err)
+		return
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			filePaths = append(filePaths, orgPath+"/"+file.Name())
+		}
+	}
 	g, e := GetLongestFileSize(orgPath)
 	if e != nil {
 		RedPrintln("Error getting longest file size")
@@ -23,7 +41,7 @@ func DirSearcher(orgPath string) {
 		log.Fatal(err)
 	}
 	if LongFormat || DashO {
-		bcount, err := getblockcount(fileArray)
+		bcount, err := getblockcount(filePaths)
 		if err != nil {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
