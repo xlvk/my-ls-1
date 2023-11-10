@@ -247,25 +247,19 @@ func lookupGroupById(gid uint32) (string, error) {
 	return g.Name, nil
 }
 
-func GetBlockCount(directoryPath string) (int64, error) {
-	// Open the directory
-	dir, err := os.Open(directoryPath)
-	if err != nil {
-		return 0, err
+func getblockcount(filePaths []string) (int64, error) {
+	var totalBlocks int64
+	for _, path := range filePaths {
+		fileInfo, err := os.Stat(path)
+		if err != nil {
+			return 0, err // handle the error appropriately
+		}
+
+		if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
+			totalBlocks += stat.Blocks
+		}
 	}
-	defer dir.Close()
-
-	// Get the directory file information
-	dirInfo, err := dir.Stat()
-	if err != nil {
-		return 0, err
-	}
-
-	// Get the underlying syscall.Stat_t structure
-	stat := dirInfo.Sys().(*syscall.Stat_t)
-
-	// Return the block count
-	return stat.Blocks, nil
+	return totalBlocks, nil
 }
 
 func GetLongestFileSize(filepath string) (int, error) {
@@ -369,23 +363,4 @@ func VisitDir(dirPath string, walkFn func(path string, info os.FileInfo, err err
 	}
 
 	return nil
-}
-
-func GetBlocksOccupied(filePath string) (int32, error) {
-
-	fileInfo, err := os.Lstat(filePath)
-	if err != nil {
-		return 0, err
-	}
-
-	stat, ok := fileInfo.Sys().(*syscall.Stat_t)
-	if !ok {
-		return 0, fmt.Errorf("failed to retrieve file information")
-	}
-
-	blockSize := stat.Blksize
-	// fileSize := fileInfo.Size()
-	// blocksOccupied := (fileSize + int64(blockSize) - 1) / int64(blockSize)
-
-	return blockSize, nil
 }

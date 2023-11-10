@@ -23,7 +23,7 @@ func DirSearcher(orgPath string) {
 		log.Fatal(err)
 	}
 	if LongFormat || DashO {
-		bcount, err := GetBlocksOccupied(orgPath)
+		bcount, err := getblockcount(fileArray)
 		if err != nil {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
@@ -44,6 +44,9 @@ func DirSearcher(orgPath string) {
 			Directories = append(Directories, file.Name())
 		}
 		fileArray = append(fileArray, file.Name())
+	}
+	if DisplayHidden {
+		fileArray = append(fileArray, ".", "..")
 	}
 
 	//* sort the arrays and proceed
