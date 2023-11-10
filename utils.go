@@ -2,10 +2,11 @@ package ghostls
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"log"
 	"os"
 	"os/user"
+	"sort"
 	"strconv"
 	"strings"
 	"syscall"
@@ -184,7 +185,7 @@ func GetTotalCount(dirPath string) (int64, error) {
 
 // * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
-	fcount := uint64(0)
+	fcount := uint16(0)
 
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
@@ -246,30 +247,46 @@ func lookupGroupById(gid uint32) (string, error) {
 	return g.Name, nil
 }
 
-func GetBlockCount(directoryPath string) (int64, error) {
-	// Open the directory
-	dir, err := os.Open(directoryPath)
-	if err != nil {
-		return 0, err
+func GetBlockCount(filePaths []string) (int64, error) {
+	var totalBlocks int64
+	for _, path := range filePaths {
+		fileInfo, err := os.Lstat(path) // Use Lstat instead of Stat
+		if err != nil {
+			return 0, fmt.Errorf("error getting file info for %s: %w", path, err)
+		}
+
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			// For symlinks, you might choose to ignore them or handle differently.
+			// Currently skipping symlinks. If you want to count the blocks of the file the symlink points to,
+			// you'll need to resolve the symlink and then use os.Stat on the resolved path.
+			continue
+		} else {
+			// Handle regular file case
+			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
+				totalBlocks += stat.Blocks
+			} else {
+				return 0, fmt.Errorf("could not assert type *syscall.Stat_t for file %s", path)
+			}
+		}
 	}
-	defer dir.Close()
-
-	// Get the directory file information
-	dirInfo, err := dir.Stat()
-	if err != nil {
-		return 0, err
-	}
-
-	// Get the underlying syscall.Stat_t structure
-	stat := dirInfo.Sys().(*syscall.Stat_t)
-
-	// Return the block count
-	return stat.Blocks, nil
+	return totalBlocks, nil
 }
 
 func GetLongestFileSize(filepath string) (int, error) {
 	// Read the directory contents
-	files, err := ioutil.ReadDir(filepath)
+	files, err := func() ([]fs.FileInfo, error) {
+		f, err := os.Open(filepath)
+		if err != nil {
+			return nil, err
+		}
+		list, err := f.Readdir(-1)
+		f.Close()
+		if err != nil {
+			return nil, err
+		}
+		sort.Slice(list, func(i, j int) bool { return list[i].Name() < list[j].Name() })
+		return list, nil
+	}()
 	if err != nil {
 		return 0, err
 	}
@@ -357,23 +374,3 @@ func VisitDir(dirPath string, walkFn func(path string, info os.FileInfo, err err
 
 	return nil
 }
-
-func GetBlocksOccupied(filePath string) (int64, error) {
-	fileInfo, err := os.Lstat(filePath)
-	if err != nil {
-		return 0, err
-	}
-
-	stat, ok := fileInfo.Sys().(*syscall.Stat_t)
-	if !ok {
-		return 0, fmt.Errorf("failed to retrieve file information")
-	}
-
-	blockSize := stat.Blksize
-	// fileSize := fileInfo.Size()
-	// blocksOccupied := (fileSize + int64(blockSize) - 1) / int64(blockSize)
-
-	return blockSize, nil
-}
-
-

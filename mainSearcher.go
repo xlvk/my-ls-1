@@ -11,7 +11,25 @@ import (
 func DirSearcher(orgPath string) {
 	var Directories []string
 	var fileArray []string
-	files, err := os.ReadDir(orgPath)
+	var filePaths []string
+	dir, err := os.Open(orgPath)
+	if err != nil {
+		fmt.Println("Error opening directory:", err)
+		return
+	}
+	defer dir.Close()
+
+	files, err := dir.Readdir(-1) // -1 to read all files
+	if err != nil {
+		fmt.Println("Error reading directory contents:", err)
+		return
+	}
+
+	for _, file := range files {
+		if !file.IsDir() {
+			filePaths = append(filePaths, orgPath+"/"+file.Name())
+		}
+	}
 	g, e := GetLongestFileSize(orgPath)
 	if e != nil {
 		RedPrintln("Error getting longest file size")
@@ -23,12 +41,12 @@ func DirSearcher(orgPath string) {
 		log.Fatal(err)
 	}
 	if LongFormat || DashO {
-		bcount, err := GetBlocksOccupied(orgPath)
+		bcount, err := GetBlockCount(filePaths)
 		if err != nil {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
 		}
-		fmt.Println("total " + strconv.FormatInt(bcount, 10))
+		fmt.Println("total " + strconv.FormatInt(int64(bcount), 10))
 	}
 	for _, file := range files {
 		if strings.HasPrefix(file.Name(), ".") && !DisplayHidden {
@@ -44,6 +62,9 @@ func DirSearcher(orgPath string) {
 			Directories = append(Directories, file.Name())
 		}
 		fileArray = append(fileArray, file.Name())
+	}
+	if DisplayHidden {
+		fileArray = append(fileArray, ".", "..")
 	}
 
 	//* sort the arrays and proceed
@@ -96,7 +117,7 @@ func DirSearcher(orgPath string) {
 
 			fmt.Print(todisplay + "  ")
 
-			if i%8 == 0 && i!= 0{
+			if i%8 == 0 && i != 0 {
 				fmt.Println()
 			}
 		} else if LongFormat || DashO {
