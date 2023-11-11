@@ -247,7 +247,12 @@ func lookupGroupById(gid uint32) (string, error) {
 	return g.Name, nil
 }
 
-func GetBlockCount(filePaths []string) (int64, error) {
+func GetBlockCount(filePaths []string, path string) (int64, error) {
+	blockSize, err := GetBlockSize(path)
+	if err != nil {
+		return 0, fmt.Errorf("error getting block size: %w", err)
+	}
+
 	var totalBlocks int64
 	for _, path := range filePaths {
 		// Check if the file is hidden and should be skipped
@@ -266,7 +271,7 @@ func GetBlockCount(filePaths []string) (int64, error) {
 		} else {
 			// Regular file handling as before
 			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-				totalBlocks += stat.Blocks
+				totalBlocks += int64(stat.Blocks) * blockSize
 			} else {
 				return 0, fmt.Errorf("could not assert type *syscall.Stat_t for file %s", path)
 			}
@@ -382,4 +387,13 @@ func isHiddenFile(filePath string) bool {
 	parts := strings.Split(filePath, "/")
 	fileName := parts[len(parts)-1]
 	return strings.HasPrefix(fileName, ".")
+}
+
+func GetBlockSize(path string) (int64, error) {
+	var stat syscall.Statfs_t
+	err := syscall.Statfs(path, &stat)
+	if err != nil {
+		return 0, err
+	}
+	return int64(stat.Bsize), nil
 }
