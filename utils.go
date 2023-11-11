@@ -62,7 +62,7 @@ func SortByCreationTime(initialdir string, filePaths []string, reverse bool) []s
 func BubbleSort(arr []string) {
 	for i := 0; i < len(arr)-1; i++ {
 		for j := i + 1; j < len(arr); j++ {
-			if strings.ToLower(arr[i]) > strings.ToLower(arr[j]) {
+			if arr[i] > arr[j] {
 				arr[i], arr[j] = arr[j], arr[i]
 			}
 		}
@@ -72,7 +72,7 @@ func BubbleSort(arr []string) {
 func RevBubbleSort(arr []string) {
 	for i := 0; i < len(arr)-1; i++ {
 		for j := i + 1; j < len(arr); j++ {
-			if strings.ToLower(arr[i]) < strings.ToLower(arr[j]) {
+			if arr[i] < arr[j] {
 				arr[i], arr[j] = arr[j], arr[i]
 			}
 		}
@@ -185,7 +185,7 @@ func GetTotalCount(dirPath string) (int64, error) {
 
 // * syscall to get hard link numbers
 func GetHardLinkNum(path string) (string, error) {
-	fcount := uint64(0)
+	fcount := uint32(0)
 
 	fileinfo, err := os.Lstat(path)
 	if err != nil {
@@ -247,13 +247,12 @@ func lookupGroupById(gid uint32) (string, error) {
 	return g.Name, nil
 }
 
-func GetBlockCount(filePaths []string, path string) (int64, error) {
-	blockSize, err := GetBlockSize(path)
+func GetBlockCount(filePaths []string) (int64, error) {
+	var totalSize int64
+	blockSize, err := GetBlockSize(filePaths[0])
 	if err != nil {
-		return 0, fmt.Errorf("error getting block size: %w", err)
+		return 0, err
 	}
-
-	var totalSizeBytes int64
 	for _, path := range filePaths {
 		// Check if the file is hidden and should be skipped
 		if !DisplayHidden && isHiddenFile(path) {
@@ -271,14 +270,21 @@ func GetBlockCount(filePaths []string, path string) (int64, error) {
 		} else {
 			// Regular file handling as before
 			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-				totalSizeBytes += int64(stat.Blocks) * blockSize
+				fileSize := (int64(stat.Blocks) * 512)
+				if fileSize%blockSize != 0 {
+					fileSize += blockSize - (fileSize % blockSize)
+				}
+				totalSize += fileSize
 			} else {
 				return 0, fmt.Errorf("could not assert type *syscall.Stat_t for file %s", path)
 			}
 		}
 	}
-	totalBlocks := (totalSizeBytes + blockSize - 1) / blockSize
-	return totalBlocks, nil
+	blockCount := totalSize / 1024
+	if totalSize%1024 != 0 {
+		blockCount++
+	}
+	return blockCount, nil
 }
 
 func GetLongestFileSize(filepath string) (int, error) {

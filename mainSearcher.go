@@ -41,7 +41,7 @@ func DirSearcher(orgPath string) {
 		log.Fatal(err)
 	}
 	if LongFormat || DashO {
-		bcount, err := GetBlockCount(filePaths, orgPath)
+		bcount, err := GetBlockCount(filePaths)
 		if err != nil {
 			RedPrintln("ERROR GETTING BLOCKCOUNT IN MAINSEARCHER")
 			log.Fatal(err)
