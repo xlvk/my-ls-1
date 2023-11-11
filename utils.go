@@ -253,7 +253,7 @@ func GetBlockCount(filePaths []string, path string) (int64, error) {
 		return 0, fmt.Errorf("error getting block size: %w", err)
 	}
 
-	var totalBlocks int64
+	var totalSizeBytes int64
 	for _, path := range filePaths {
 		// Check if the file is hidden and should be skipped
 		if !DisplayHidden && isHiddenFile(path) {
@@ -271,12 +271,13 @@ func GetBlockCount(filePaths []string, path string) (int64, error) {
 		} else {
 			// Regular file handling as before
 			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
-				totalBlocks += int64(stat.Blocks) * blockSize
+				totalSizeBytes += int64(stat.Blocks) * blockSize
 			} else {
 				return 0, fmt.Errorf("could not assert type *syscall.Stat_t for file %s", path)
 			}
 		}
 	}
+	totalBlocks := (totalSizeBytes + blockSize - 1) / blockSize
 	return totalBlocks, nil
 }
 
