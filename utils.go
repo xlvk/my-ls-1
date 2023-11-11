@@ -250,18 +250,21 @@ func lookupGroupById(gid uint32) (string, error) {
 func GetBlockCount(filePaths []string) (int64, error) {
 	var totalBlocks int64
 	for _, path := range filePaths {
-		fileInfo, err := os.Lstat(path) // Use Lstat instead of Stat
+		// Check if the file is hidden and should be skipped
+		if !DisplayHidden && isHiddenFile(path) {
+			continue
+		}
+
+		fileInfo, err := os.Lstat(path)
 		if err != nil {
 			return 0, fmt.Errorf("error getting file info for %s: %w", path, err)
 		}
 
 		if fileInfo.Mode()&os.ModeSymlink != 0 {
-			// For symlinks, you might choose to ignore them or handle differently.
-			// Currently skipping symlinks. If you want to count the blocks of the file the symlink points to,
-			// you'll need to resolve the symlink and then use os.Stat on the resolved path.
+			// Handling for symlinks as before
 			continue
 		} else {
-			// Handle regular file case
+			// Regular file handling as before
 			if stat, ok := fileInfo.Sys().(*syscall.Stat_t); ok {
 				totalBlocks += stat.Blocks
 			} else {
@@ -373,4 +376,10 @@ func VisitDir(dirPath string, walkFn func(path string, info os.FileInfo, err err
 	}
 
 	return nil
+}
+
+func isHiddenFile(filePath string) bool {
+	parts := strings.Split(filePath, "/")
+	fileName := parts[len(parts)-1]
+	return strings.HasPrefix(fileName, ".")
 }
